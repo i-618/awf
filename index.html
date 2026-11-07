@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Presentation</title>
+    <style>
+      :root { color-scheme: dark; }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      #start {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #000;
+        color: #fff;
+        border: 0;
+        width: 100%;
+        height: 100%;
+        font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+        cursor: pointer;
+      }
+      #viewer {
+        display: none;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="start" type="button">Click to start presentation</button>
+    <iframe id="viewer" title="Presentation"></iframe>
+
+    <script>
+      const startButton = document.getElementById('start');
+      const viewer = document.getElementById('viewer');
+
+      let page = 1;
+
+      const setPage = () => {
+        const mode = 'toolbar=0&navpanes=0&scrollbar=0&view=FitH';
+        viewer.src = `presentation.pdf#page=${page}&${mode}`;
+      };
+
+      const nextSlide = () => {
+        page += 1;
+        setPage();
+      };
+
+      const prevSlide = () => {
+        page = Math.max(1, page - 1);
+        setPage();
+      };
+
+      const startPresentation = async () => {
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch {
+          // Continue without fullscreen when blocked.
+        }
+
+        startButton.style.display = 'none';
+        viewer.style.display = 'block';
+        setPage();
+      };
+
+      startButton.addEventListener('click', startPresentation);
+
+      document.addEventListener('click', (event) => {
+        if (startButton.style.display !== 'none') return;
+        if (event.target === startButton) return;
+
+        const clickOnLeftHalf = event.clientX < window.innerWidth / 2;
+        if (clickOnLeftHalf) {
+          prevSlide();
+        } else {
+          nextSlide();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (startButton.style.display !== 'none') return;
+
+        if (event.key === 'ArrowLeft') prevSlide();
+        if (event.key === 'ArrowRight' || event.key === ' ') nextSlide();
+      });
+    </script>
+  </body>
+</html>
